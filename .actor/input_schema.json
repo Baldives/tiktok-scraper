@@ -1,50 +1,53 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "TikTok Scraper Actor Input",
-    "type": "object",
-    "schemaVersion": 1,
-    "properties": {
-        "type": {
-            "type": "string",
-            "title": "Type of content to scrape",
-            "description": "Choose what you want to scrape: user, hashtag, trend, music, or video.",
-            "enum": ["user", "hashtag", "trend", "music", "video"],
-            "editor": "select",
-            "default": "hashtag"
-        },
-        "query": {
-            "type": "string",
-            "title": "Query",
-            "description": "Username, hashtag, music ID, or video URL depending on type.",
-            "editor": "text"
-        },
-        "number": {
-            "type": "integer",
-            "title": "Number of posts",
-            "description": "Number of posts to scrape. Set 0 to scrape all available posts.",
-            "default": 20
-        },
-        "download": {
-            "type": "boolean",
-            "title": "Download videos",
-            "description": "Whether to download videos or just extract metadata.",
-            "default": false
-        },
-        "filetype": {
-            "type": "string",
-            "title": "Output file type",
-            "description": "Choose format for saving metadata.",
-            "enum": ["json", "csv", "all"],
-            "editor": "select",
-            "default": "json"
-        },
-        "filepath": {
-            "type": "string",
-            "title": "Output folder",
-            "description": "Folder where metadata and videos will be saved.",
-            "default": "output",
-            "editor": "text"
-        }
+  "schemaVersion": 1,
+  "title": "TikTok Scraper",
+  "type": "object",
+  "properties": {
+    "query": {
+      "title": "Query",
+      "description": "Username, hashtag, video URL, or music ID to scrape",
+      "type": "string",
+      "editor": "textfield"
     },
-    "required": ["type", "query"]
+    "type": {
+      "title": "Scrape type",
+      "description": "Choose what type of feed to scrape",
+      "type": "string",
+      "editor": "select",
+      "options": ["user", "hashtag", "trend", "music", "video"]
+    },
+    "filetype": {
+      "title": "Output file type",
+      "description": "Choose the format of the output file",
+      "type": "string",
+      "editor": "select",
+      "options": ["json", "csv", "all"]
+    },
+    "sessionFile": {
+      "title": "Session file",
+      "description": "Path to session.txt with your TikTok cookies",
+      "type": "string",
+      "editor": "fileupload"
+    },
+    "number": {
+      "title": "Number of posts",
+      "description": "Number of posts to scrape (0 = all)",
+      "type": "integer",
+      "default": 0,
+      "editor": "textfield"
+    },
+    "download": {
+      "title": "Download videos",
+      "description": "Download video files along with metadata",
+      "type": "boolean",
+      "default": false
+    },
+    "filepath": {
+      "title": "Output folder",
+      "description": "Where to save downloaded videos or data",
+      "type": "string",
+      "editor": "textfield"
+    }
+  },
+  "required": ["query", "type"]
 }
