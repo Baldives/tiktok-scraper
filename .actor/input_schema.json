@@ -36,7 +36,7 @@
             "type": "string",
             "title": "Output file type",
             "description": "Format for scraped metadata",
-            "editor": "dropdown",
+            "editor": "select",
             "enum": ["json", "csv", "all"],
             "default": "json"
         }
