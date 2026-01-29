@@ -1,61 +1,60 @@
-import Apify from 'apify';
-// Import from compiled JS if using TypeScript build, adjust path if needed
-import { hashtag, user } from '../dist/index.js'; 
+// main.js
+import { Actor } from 'apify';
+import path from 'path';
+import fs from 'fs';
+import { hashtag, user, trend, music, video } from './src/entry.js';
 
-Apify.main(async () => {
-    // 1️⃣ Get input from Apify UI or default
-    const input = await Apify.getInput();
-    const scrapeType = input.scrapeType || 'hashtag'; // 'hashtag' or 'user'
-    const query = input.query;
-    const maxVideos = input.maxVideos || 50;
+await Actor.init();
 
-    if (!query) {
-        throw new Error('Please provide a query (hashtag or username) in the input');
-    }
+const input = await Actor.getInput();
 
-    // 2️⃣ Set up scraping options
-    const options = {
-        number: maxVideos,       // max videos to fetch
-        download: false,         // no video download
-        asyncScraping: 2,        // concurrency
-        proxy: Apify.getApifyProxyUrl(), // use Apify proxies
-        noWaterMark: false       // include watermark URLs
-    };
+if (!input || !input.type || !input.query) {
+    throw new Error('Input must have "type" (user, hashtag, trend, music, video) and "query" fields.');
+}
 
-    let result;
+// Set session file path
+const sessionFile = path.resolve('.actor/session.txt');
+if (!fs.existsSync(sessionFile)) {
+    throw new Error(`Session file not found at ${sessionFile}`);
+}
 
-    try {
-        // 3️⃣ Call the appropriate scraper
-        if (scrapeType === 'hashtag') {
-            result = await hashtag(query, options);
-        } else if (scrapeType === 'user') {
-            result = await user(query, options);
-        } else {
-            throw new Error(`Unsupported scrapeType: ${scrapeType}`);
-        }
-    } catch (err) {
-        console.error('Scraping failed:', err);
-        throw err;
-    }
+// Prepare common options
+const options = {
+    sessionFile,
+    number: input.number || 20,         // default scrape 20 posts
+    download: input.download || false,  // download videos if true
+    filetype: input.filetype || 'json', // json/csv/all
+    filepath: input.filepath || 'output' // where to save downloads/metadata
+};
 
-    // 4️⃣ Push each video to Apify dataset
-    if (result && result.collector && Array.isArray(result.collector)) {
-        for (const post of result.collector) {
-            await Apify.pushData({
-                id: post.id,
-                type: scrapeType,
-                query,
-                author: post.author?.uniqueId,
-                caption: post.text,
-                createdAt: post.createTime ? new Date(post.createTime * 1000).toISOString() : null,
-                videoUrl: post.video?.downloadAddr || post.video?.playAddr,
-                playCount: post.stats?.playCount,
-                likeCount: post.stats?.diggCount,
-                commentCount: post.stats?.commentCount,
-                shareCount: post.stats?.shareCount
-            });
-        }
-    }
+// Make sure output folder exists
+if (!fs.existsSync(options.filepath)) {
+    fs.mkdirSync(options.filepath, { recursive: true });
+}
 
-    console.log(`Scraping finished: ${result.collector.length} videos collected for ${scrapeType} "${query}"`);
-});
+let result;
+
+switch (input.type) {
+    case 'hashtag':
+        result = await hashtag(input.query, options);
+        break;
+    case 'user':
+        result = await user(input.query, options);
+        break;
+    case 'trend':
+        result = await trend(input.query, options);
+        break;
+    case 'music':
+        result = await music(input.query, options);
+        break;
+    case 'video':
+        result = await video(input.query, options);
+        break;
+    default:
+        throw new Error(`Unknown type: ${input.type}`);
+}
+
+console.log('Scraping finished. Result:');
+console.log(result);
+
+await Actor.exit();
