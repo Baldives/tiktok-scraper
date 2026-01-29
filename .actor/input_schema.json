@@ -1,52 +1,101 @@
 {
   "schemaVersion": 1,
-  "title": "TikTok Scraper",
+  "title": "TikTok Scraper Input",
   "type": "object",
   "properties": {
     "query": {
-      "title": "Query",
-      "description": "Username, hashtag, video URL, or music ID to scrape",
+      "title": "Search query",
+      "description": "Username, hashtag, or video ID to scrape",
       "type": "string",
       "editor": "textfield"
     },
     "type": {
-      "title": "Scrape type",
-      "description": "Choose what type of feed to scrape",
+      "title": "Type of scraping",
+      "description": "Choose which feed to scrape",
       "type": "string",
       "editor": "select",
-      "enumSuggestedValues": ["user", "hashtag", "trend", "music", "video"]
-    },
-    "filetype": {
-      "title": "Output file type",
-      "description": "Choose the format of the output file",
-      "type": "string",
-      "editor": "select",
-      "enumSuggestedValues": ["json", "csv", "all"]
-    },
-    "sessionFile": {
-      "title": "Session file",
-      "description": "Path to session.txt with your TikTok cookies",
-      "type": "string",
-      "editor": "fileupload"
+      "enumSuggestedValues": ["user", "hashtag", "trend", "music", "video", "from-file", "userprofile"]
     },
     "number": {
       "title": "Number of posts",
       "description": "Number of posts to scrape (0 = all)",
       "type": "integer",
       "default": 0,
+      "editor": "number"
+    },
+    "session": {
+      "title": "Session cookie",
+      "description": "TikTok logged-in session (sid_tt, sessionid, ttwid etc.)",
+      "type": "string",
       "editor": "textfield"
+    },
+    "sessionFile": {
+      "title": "Session file path",
+      "description": "Path to a file containing session cookies, one per line",
+      "type": "string",
+      "editor": "fileupload"
+    },
+    "proxy": {
+      "title": "Proxy",
+      "description": "Set single proxy (optional)",
+      "type": "string",
+      "editor": "textfield"
+    },
+    "proxyFile": {
+      "title": "Proxy file",
+      "description": "Path to file with proxies, one per line",
+      "type": "string",
+      "editor": "fileupload"
     },
     "download": {
       "title": "Download videos",
-      "description": "Download video files along with metadata",
+      "description": "Download video posts to local folder",
+      "type": "boolean",
+      "default": false
+    },
+    "noWaterMark": {
+      "title": "Download without watermark",
+      "description": "Applicable for Hashtag feed; other feeds already have no watermark",
       "type": "boolean",
       "default": false
     },
     "filepath": {
       "title": "Output folder",
-      "description": "Where to save downloaded videos or data",
+      "description": "Path to save all output files",
       "type": "string",
       "editor": "textfield"
+    },
+    "filetype": {
+      "title": "Output file type",
+      "description": "Format for saving scraped posts",
+      "type": "string",
+      "editor": "select",
+      "enumSuggestedValues": ["csv", "json", "all"]
+    },
+    "filename": {
+      "title": "Custom filename",
+      "description": "Set custom filename for output",
+      "type": "string",
+      "editor": "textfield"
+    },
+    "asyncDownload": {
+      "title": "Concurrent downloads",
+      "description": "Number of concurrent downloads",
+      "type": "integer",
+      "default": 5,
+      "editor": "number"
+    },
+    "hd": {
+      "title": "HD download",
+      "description": "Download video in HD (larger files, slower execution)",
+      "type": "boolean",
+      "default": false
+    },
+    "zip": {
+      "title": "Zip all videos",
+      "description": "Zip downloaded videos",
+      "type": "boolean",
+      "default": false
     }
   },
   "required": ["query", "type"]
