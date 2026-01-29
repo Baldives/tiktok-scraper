@@ -1,0 +1,8 @@
+{
+  "name": "tiktok-scraper",
+  "title": "TikTok Scraper (Hashtag / User)",
+  "description": "Scrape TikTok video URLs and metadata using a lightweight API-based scraper.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "main": "apify/main.js"
+}
