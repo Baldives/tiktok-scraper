@@ -2,40 +2,46 @@
 import { Actor } from 'apify';
 import { execSync } from 'child_process';
 import path from 'path';
+import fs from 'fs';
+import axios from 'axios';
 
 await Actor.init();
 
 try {
-    // Get input from the actor's input schema
     const input = await Actor.getInput();
+    const { type, query, number = 0, filetype = 'json', download = false, sessionFile, apifyProxyGroups } = input;
 
-    // Mandatory fields in input schema
-    const username = input.username; // or hashtag, trend, etc.
-    const sessionFile = input.sessionFile || 'session.txt'; // default path in Apify folder
-    const proxyGroups = input.apifyProxyGroups || ''; // Apify proxy group names
-    const filetype = input.filetype || 'json'; // output file type
-    const since = input.since || 0; // scrape posts after this timestamp
-    const number = input.number ?? 0; // number of posts to scrape (0 = all)
+    // Validate type
+    if (!['user', 'hashtag', 'trend', 'music', 'video'].includes(type)) {
+        throw new Error(`Invalid type "${type}". Must be one of: user, hashtag, trend, music, video`);
+    }
+
+    // Download session file if it's a URL
+    let sessionPath = sessionFile;
+    if (sessionFile.startsWith('http')) {
+        const response = await axios.get(sessionFile);
+        sessionPath = 'session.txt';
+        fs.writeFileSync(sessionPath, response.data);
+    }
 
     // Build CLI command
-    const cliPath = path.join('.', 'cli.js'); // path to the TikTok scraper CLI
+    const cliPath = path.join('.', 'cli.js');
     const cmd = [
         'node', cliPath,
-        'user', username,                     // change to 'hashtag' or 'trend' if needed
-        '--session-file', sessionFile,
-        '--proxy', proxyGroups,
+        type, query,
+        '--session-file', sessionPath,
         '--filetype', filetype,
-        '--since', since,
         '--number', number,
-    ];
+        download ? '-d' : '',
+        apifyProxyGroups ? `--proxy ${apifyProxyGroups}` : ''
+    ].filter(Boolean);
 
-    // Run the CLI command synchronously
-    console.log('Running TikTok scraper CLI...');
+    console.log('Running TikTok scraper CLI:', cmd.join(' '));
+
     const output = execSync(cmd.join(' '), { encoding: 'utf-8' });
 
     console.log('CLI output:', output);
 
-    // Store the CLI output in Apify dataset
     await Actor.pushData({ result: output });
 
     console.log('Scraping finished. Data saved to default dataset.');
