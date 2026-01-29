@@ -14,14 +14,16 @@
       "description": "Choose what type of feed to scrape",
       "type": "string",
       "editor": "select",
-      "options": ["user", "hashtag", "trend", "music", "video"]
+      "options": ["user", "hashtag", "trend", "music", "video"],
+      "enumSuggestedValues": ["user", "hashtag", "trend", "music", "video"]
     },
     "filetype": {
       "title": "Output file type",
       "description": "Choose the format of the output file",
       "type": "string",
       "editor": "select",
-      "options": ["json", "csv", "all"]
+      "options": ["json", "csv", "all"],
+      "enumSuggestedValues": ["json", "csv", "all"]
     },
     "sessionFile": {
       "title": "Session file",
