@@ -1,102 +1,72 @@
 {
-  "schemaVersion": 1,
-  "title": "TikTok Scraper Input",
+  "title": "TikTok Scraper Actor",
   "type": "object",
+  "schemaVersion": 1,
   "properties": {
+    "type": {
+      "title": "Scrape Type",
+      "description": "Choose what to scrape: user, hashtag, trend, music, video",
+      "type": "string",
+      "enum": ["user", "hashtag", "trend", "music", "video"],
+      "editor": "select",
+      "default": "hashtag"
+    },
     "query": {
-      "title": "Search query",
-      "description": "Username, hashtag, or video ID to scrape",
+      "title": "Query",
+      "description": "The username, hashtag, music ID, or video URL depending on the type",
       "type": "string",
       "editor": "textfield"
-    },
-    "type": {
-      "title": "Type of scraping",
-      "description": "Choose which feed to scrape",
-      "type": "string",
-      "editor": "select",
-      "enumSuggestedValues": ["user", "hashtag", "trend", "music", "video", "from-file", "userprofile"]
     },
     "number": {
       "title": "Number of posts",
-      "description": "Number of posts to scrape (0 = all)",
-      "type": "integer",
-      "default": 0,
-      "editor": "number"
-    },
-    "session": {
-      "title": "Session cookie",
-      "description": "TikTok logged-in session (sid_tt, sessionid, ttwid etc.)",
-      "type": "string",
-      "editor": "textfield"
-    },
-    "sessionFile": {
-      "title": "Session file path",
-      "description": "Path to a file containing session cookies, one per line",
-      "type": "string",
-      "editor": "fileupload"
-    },
-    "proxy": {
-      "title": "Proxy",
-      "description": "Set single proxy (optional)",
-      "type": "string",
-      "editor": "textfield"
-    },
-    "proxyFile": {
-      "title": "Proxy file",
-      "description": "Path to file with proxies, one per line",
-      "type": "string",
-      "editor": "fileupload"
-    },
-    "download": {
-      "title": "Download videos",
-      "description": "Download video posts to local folder",
-      "type": "boolean",
-      "default": false
-    },
-    "noWaterMark": {
-      "title": "Download without watermark",
-      "description": "Applicable for Hashtag feed; other feeds already have no watermark",
-      "type": "boolean",
-      "default": false
-    },
-    "filepath": {
-      "title": "Output folder",
-      "description": "Path to save all output files",
-      "type": "string",
-      "editor": "textfield"
+      "description": "Number of posts to scrape. 0 means all posts",
+      "type": "number",
+      "editor": "number",
+      "default": 10
     },
     "filetype": {
       "title": "Output file type",
-      "description": "Format for saving scraped posts",
+      "description": "Type of the output file",
       "type": "string",
+      "enum": ["json", "csv", "all"],
       "editor": "select",
-      "enumSuggestedValues": ["csv", "json", "all"]
+      "default": "json"
     },
     "filename": {
-      "title": "Custom filename",
-      "description": "Set custom filename for output",
+      "title": "Output filename",
+      "description": "Custom filename for saved output",
       "type": "string",
-      "editor": "textfield"
+      "editor": "textfield",
+      "default": ""
     },
-    "asyncDownload": {
-      "title": "Concurrent downloads",
-      "description": "Number of concurrent downloads",
-      "type": "integer",
-      "default": 5,
-      "editor": "number"
+    "sessionFile": {
+      "title": "Session file",
+      "description": "Path to the file with TikTok cookies",
+      "type": "string",
+      "editor": "fileupload",
+      "default": "apify/session.txt"
     },
-    "hd": {
-      "title": "HD download",
-      "description": "Download video in HD (larger files, slower execution)",
+    "useApifyProxy": {
+      "title": "Use Apify Residential Proxy",
+      "description": "Enable Apify proxy to avoid blocking",
       "type": "boolean",
-      "default": false
+      "editor": "checkbox",
+      "default": true
     },
-    "zip": {
-      "title": "Zip all videos",
-      "description": "Zip downloaded videos",
-      "type": "boolean",
-      "default": false
+    "apifyProxyGroups": {
+      "title": "Proxy Groups",
+      "description": "Which Apify proxy groups to use (comma-separated)",
+      "type": "array",
+      "editor": "textfield",
+      "default": ["RESIDENTIAL"]
+    },
+    "apifyProxySession": {
+      "title": "Proxy Session ID",
+      "description": "Optional custom session ID for proxy",
+      "type": "string",
+      "editor": "textfield",
+      "default": "session-1"
     }
   },
-  "required": ["query", "type"]
+  "required": ["type", "query"]
 }
