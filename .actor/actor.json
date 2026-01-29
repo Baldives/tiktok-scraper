@@ -1,4 +1,5 @@
 {
+  "actorSpecification": 1,
   "name": "tiktok-scraper",
   "title": "TikTok Scraper (Hashtag / User)",
   "description": "Scrape TikTok video URLs and metadata using a lightweight API-based scraper.",
