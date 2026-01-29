@@ -1,59 +1,58 @@
 {
-    "schemaVersion": 1,
-    "title": "TikTok Scraper",
-    "type": "object",
-    "properties": {
-        "type": {
-            "title": "Scrape type",
-            "type": "string",
-            "description": "Select what kind of data to scrape: user, hashtag, trend, music, or single video",
-            "enum": ["user", "hashtag", "trend", "music", "video"],
-            "default": "hashtag",
-            "editor": "select"
-        },
-        "query": {
-            "title": "Query",
-            "type": "string",
-            "description": "Username, hashtag (without #), music ID, or video URL depending on the type",
-            "default": "funnycats",
-            "editor": "textfield"
-        },
-        "number": {
-            "title": "Number of posts",
-            "type": "integer",
-            "description": "Number of posts to scrape (0 = all posts)",
-            "default": 10,
-            "editor": "number"
-        },
-        "filetype": {
-            "title": "Output file type",
-            "type": "string",
-            "description": "Type of output file to save scraped data",
-            "enum": ["json", "csv", "all"],
-            "default": "json",
-            "editor": "select"
-        },
-        "download": {
-            "title": "Download videos",
-            "type": "boolean",
-            "description": "Enable this to download videos. Leave false to skip downloading",
-            "default": false,
-            "editor": "checkbox"
-        },
-        "sessionFile": {
-            "title": "Session file URL",
-            "type": "string",
-            "description": "URL or local path to your TikTok session.txt file",
-            "default": "https://api.apify.com/v2/key-value-stores/xBL9Q4rOybWUnKk19/records/session.txt",
-            "editor": "textfield"
-        },
-        "apifyProxyGroups": {
-            "title": "Apify Proxy Group",
-            "type": "string",
-            "description": "Name of the Apify proxy group to use (RESIDENTIAL recommended for less blocking)",
-            "default": "RESIDENTIAL",
-            "editor": "textfield"
-        }
+  "title": "TikTok Scraper Input",
+  "description": "Input configuration for scraping TikTok hashtags, trends, music, or user metadata.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "type": {
+      "title": "Scrape Type",
+      "description": "Select what to scrape: hashtag, user, trend, or music.",
+      "type": "string",
+      "enum": ["hashtag", "user", "trend", "music"],
+      "default": "hashtag"
     },
-    "required": ["type", "query", "sessionFile"]
+    "query": {
+      "title": "Query",
+      "description": "Enter the hashtag, username, or music ID depending on the type selected.",
+      "type": "string",
+      "editor": "textfield"
+    },
+    "number": {
+      "title": "Number of posts",
+      "description": "Number of posts to scrape. Set 0 to scrape all posts.",
+      "type": "integer",
+      "editor": "number",
+      "default": 10
+    },
+    "download": {
+      "title": "Download videos",
+      "description": "Set to true to download videos. We recommend false if you only need metadata.",
+      "type": "boolean",
+      "default": false
+    },
+    "filetype": {
+      "title": "Output file type",
+      "description": "Format for the output file: json, csv, or all.",
+      "type": "string",
+      "enum": ["json", "csv", "all"],
+      "default": "json",
+      "editor": "select"
+    },
+    "sessionFile": {
+      "title": "Session file path",
+      "description": "Path to the session file containing TikTok session cookies.",
+      "type": "string",
+      "editor": "textfield",
+      "default": "session.txt"
+    },
+    "proxy": {
+      "title": "Proxy type",
+      "description": "Use Apify Residential Proxy to avoid blocks. Leave empty to use default Apify proxy.",
+      "type": "string",
+      "enum": ["RESIDENTIAL", ""],
+      "default": "RESIDENTIAL",
+      "editor": "select"
+    }
+  },
+  "required": ["type", "query"]
 }
