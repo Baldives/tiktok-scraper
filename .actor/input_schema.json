@@ -1,45 +1,50 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "schemaVersion": 1,
-    "title": "TikTok Hashtag Scraper",
+    "title": "TikTok Scraper Actor Input",
     "type": "object",
+    "schemaVersion": 1,
     "properties": {
-        "hashtag": {
+        "type": {
             "type": "string",
-            "title": "Hashtag to scrape",
-            "description": "The TikTok hashtag without #",
-            "editor": "textfield",
-            "default": "funny"
+            "title": "Type of content to scrape",
+            "description": "Choose what you want to scrape: user, hashtag, trend, music, or video.",
+            "enum": ["user", "hashtag", "trend", "music", "video"],
+            "editor": "select",
+            "default": "hashtag"
+        },
+        "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Username, hashtag, music ID, or video URL depending on type.",
+            "editor": "text"
         },
         "number": {
             "type": "integer",
             "title": "Number of posts",
-            "description": "Number of videos to scrape for this hashtag",
-            "editor": "number",
+            "description": "Number of posts to scrape. Set 0 to scrape all available posts.",
             "default": 20
-        },
-        "sessionFile": {
-            "type": "string",
-            "title": "Session file",
-            "description": "Path to session.txt with TikTok cookies",
-            "editor": "textfield",
-            "default": ".actor/session.txt"
         },
         "download": {
             "type": "boolean",
             "title": "Download videos",
-            "description": "Whether to download video files",
-            "editor": "checkbox",
+            "description": "Whether to download videos or just extract metadata.",
             "default": false
         },
         "filetype": {
             "type": "string",
             "title": "Output file type",
-            "description": "Format for scraped metadata",
-            "editor": "select",
+            "description": "Choose format for saving metadata.",
             "enum": ["json", "csv", "all"],
+            "editor": "select",
             "default": "json"
+        },
+        "filepath": {
+            "type": "string",
+            "title": "Output folder",
+            "description": "Folder where metadata and videos will be saved.",
+            "default": "output",
+            "editor": "text"
         }
     },
-    "required": ["hashtag", "number"]
+    "required": ["type", "query"]
 }
