@@ -1,60 +1,69 @@
-// main.js
 import { Actor } from 'apify';
-import path from 'path';
 import fs from 'fs';
-import { hashtag, user, trend, music, video } from './src/entry.js';
+import path from 'path';
+import { exec } from 'child_process';
 
 await Actor.init();
 
 const input = await Actor.getInput();
+const sessionFilePath = path.resolve('session.txt'); // your session file
+let session = '';
 
-if (!input || !input.type || !input.query) {
-    throw new Error('Input must have "type" (user, hashtag, trend, music, video) and "query" fields.');
+// Read session.txt if it exists
+if (fs.existsSync(sessionFilePath)) {
+    session = fs.readFileSync(sessionFilePath, 'utf-8').trim();
 }
 
-// Set session file path
-const sessionFile = path.resolve('.actor/session.txt');
-if (!fs.existsSync(sessionFile)) {
-    throw new Error(`Session file not found at ${sessionFile}`);
-}
+// Build CLI command
+const cmdParts = ['node', 'cli.js'];
 
-// Prepare common options
-const options = {
-    sessionFile,
-    number: input.number || 20,         // default scrape 20 posts
-    download: input.download || false,  // download videos if true
-    filetype: input.filetype || 'json', // json/csv/all
-    filepath: input.filepath || 'output' // where to save downloads/metadata
+// Required: type and query
+if (!input.type || !input.query) {
+    throw new Error('Input "type" and "query" are required!');
+}
+cmdParts.push(input.type, input.query);
+
+// Optional flags
+if (input.number) cmdParts.push('-n', input.number.toString());
+if (input.download) cmdParts.push('-d');
+if (input.noWaterMark) cmdParts.push('-w');
+if (input.filepath) cmdParts.push('--filepath', input.filepath);
+if (input.filetype) cmdParts.push('--filetype', input.filetype);
+if (input.filename) cmdParts.push('--filename', input.filename);
+if (input.asyncDownload) cmdParts.push('--asyncDownload', input.asyncDownload.toString());
+if (input.hd) cmdParts.push('--hd');
+if (input.zip) cmdParts.push('--zip');
+if (session) cmdParts.push('--session-file', sessionFilePath);
+if (input.proxy) cmdParts.push('--proxy', input.proxy);
+if (input.proxyFile) cmdParts.push('--proxy-file', input.proxyFile);
+
+// Join command for execution
+const cmd = cmdParts.join(' ');
+
+console.log('Running command:', cmd);
+
+const runScraper = () => {
+    return new Promise((resolve, reject) => {
+        const process = exec(cmd, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve({ stdout, stderr });
+            }
+        });
+
+        process.stdout.pipe(process.stdout);
+        process.stderr.pipe(process.stderr);
+    });
 };
 
-// Make sure output folder exists
-if (!fs.existsSync(options.filepath)) {
-    fs.mkdirSync(options.filepath, { recursive: true });
+try {
+    const { stdout, stderr } = await runScraper();
+    console.log('Scraper finished.');
+    await Actor.setValue('OUTPUT', stdout);
+} catch (err) {
+    console.error('Scraper failed:', err);
+    throw err;
 }
-
-let result;
-
-switch (input.type) {
-    case 'hashtag':
-        result = await hashtag(input.query, options);
-        break;
-    case 'user':
-        result = await user(input.query, options);
-        break;
-    case 'trend':
-        result = await trend(input.query, options);
-        break;
-    case 'music':
-        result = await music(input.query, options);
-        break;
-    case 'video':
-        result = await video(input.query, options);
-        break;
-    default:
-        throw new Error(`Unknown type: ${input.type}`);
-}
-
-console.log('Scraping finished. Result:');
-console.log(result);
 
 await Actor.exit();
