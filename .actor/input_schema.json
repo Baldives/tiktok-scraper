@@ -1,31 +1,44 @@
 {
-  "title": "TikTok Scraper Input",
-  "type": "object",
-  "schemaVersion": 1,
-  "properties": {
-    "scrapeType": {
-      "title": "Scrape type",
-      "type": "string",
-      "description": "Choose what to scrape from TikTok",
-      "editor": "select",
-      "default": "hashtag",
-      "enum": ["hashtag", "user"]
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "TikTok Hashtag Scraper",
+    "type": "object",
+    "properties": {
+        "hashtag": {
+            "type": "string",
+            "title": "Hashtag to scrape",
+            "description": "The TikTok hashtag without #",
+            "editor": "textfield",
+            "default": "funny"
+        },
+        "number": {
+            "type": "integer",
+            "title": "Number of posts",
+            "description": "Number of videos to scrape for this hashtag",
+            "editor": "number",
+            "default": 20
+        },
+        "sessionFile": {
+            "type": "string",
+            "title": "Session file",
+            "description": "Path to session.txt with TikTok cookies",
+            "editor": "textfield",
+            "default": ".actor/session.txt"
+        },
+        "download": {
+            "type": "boolean",
+            "title": "Download videos",
+            "description": "Whether to download video files",
+            "editor": "checkbox",
+            "default": false
+        },
+        "filetype": {
+            "type": "string",
+            "title": "Output file type",
+            "description": "Format for scraped metadata",
+            "editor": "dropdown",
+            "enum": ["json", "csv", "all"],
+            "default": "json"
+        }
     },
-    "query": {
-      "title": "Hashtag or Username",
-      "type": "string",
-      "description": "For hashtags: enter without # (e.g., 'dogs'). For users: enter username (e.g., 'charlidamelio').",
-      "editor": "text"
-    },
-    "maxVideos": {
-      "title": "Maximum videos",
-      "type": "integer",
-      "description": "Maximum number of videos to scrape (1–500).",
-      "default": 50,
-      "minimum": 1,
-      "maximum": 500,
-      "editor": "number"
-    }
-  },
-  "required": ["scrapeType", "query"]
+    "required": ["hashtag", "number"]
 }
