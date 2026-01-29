@@ -1,0 +1,29 @@
+{
+  "title": "TikTok Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "scrapeType": {
+      "title": "Scrape type",
+      "type": "string",
+      "description": "Choose what to scrape from TikTok",
+      "editor": "select",
+      "default": "hashtag",
+      "enum": ["hashtag", "user"]
+    },
+    "query": {
+      "title": "Hashtag or Username",
+      "type": "string",
+      "description": "For hashtags: enter without # (e.g., 'dogs'). For users: enter username (e.g., 'charlidamelio')."
+    },
+    "maxVideos": {
+      "title": "Maximum videos",
+      "type": "integer",
+      "description": "Maximum number of videos to scrape (1–500).",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 500
+    }
+  },
+  "required": ["scrapeType", "query"]
+}
