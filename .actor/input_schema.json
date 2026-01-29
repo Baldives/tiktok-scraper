@@ -14,7 +14,8 @@
     "query": {
       "title": "Hashtag or Username",
       "type": "string",
-      "description": "For hashtags: enter without # (e.g., 'dogs'). For users: enter username (e.g., 'charlidamelio')."
+      "description": "For hashtags: enter without # (e.g., 'dogs'). For users: enter username (e.g., 'charlidamelio').",
+      "editor": "text"
     },
     "maxVideos": {
       "title": "Maximum videos",
@@ -22,7 +23,8 @@
       "description": "Maximum number of videos to scrape (1–500).",
       "default": 50,
       "minimum": 1,
-      "maximum": 500
+      "maximum": 500,
+      "editor": "number"
     }
   },
   "required": ["scrapeType", "query"]
