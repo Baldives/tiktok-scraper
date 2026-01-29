@@ -1,96 +1,47 @@
 // apify/main.js
 import { Actor } from 'apify';
-import { exec } from 'child_process';
-import util from 'util';
-
-const execPromise = util.promisify(exec);
+import { execSync } from 'child_process';
+import path from 'path';
 
 await Actor.init();
 
 try {
-    // Get input from Apify
+    // Get input from the actor's input schema
     const input = await Actor.getInput();
 
-    if (!input || !input.query) {
-        throw new Error('Input missing. Please provide a "query" field.');
-    }
+    // Mandatory fields in input schema
+    const username = input.username; // or hashtag, trend, etc.
+    const sessionFile = input.sessionFile || 'session.txt'; // default path in Apify folder
+    const proxyGroups = input.apifyProxyGroups || ''; // Apify proxy group names
+    const filetype = input.filetype || 'json'; // output file type
+    const since = input.since || 0; // scrape posts after this timestamp
+    const number = input.number ?? 0; // number of posts to scrape (0 = all)
 
-    // Build CLI command parts
-    const cmdParts = ['npx', 'tiktok-scraper'];
+    // Build CLI command
+    const cliPath = path.join('.', 'cli.js'); // path to the TikTok scraper CLI
+    const cmd = [
+        'node', cliPath,
+        'user', username,                     // change to 'hashtag' or 'trend' if needed
+        '--session-file', sessionFile,
+        '--proxy', proxyGroups,
+        '--filetype', filetype,
+        '--since', since,
+        '--number', number,
+    ];
 
-    // Choose scraping method
-    switch (input.type) {
-        case 'user':
-            cmdParts.push('user', input.query);
-            break;
-        case 'hashtag':
-            cmdParts.push('hashtag', input.query);
-            break;
-        case 'trend':
-            cmdParts.push('trend');
-            break;
-        case 'music':
-            cmdParts.push('music', input.query);
-            break;
-        case 'video':
-            cmdParts.push('video', input.query);
-            break;
-        default:
-            throw new Error('Invalid "type" in input. Must be one of: user, hashtag, trend, music, video');
-    }
+    // Run the CLI command synchronously
+    console.log('Running TikTok scraper CLI...');
+    const output = execSync(cmd.join(' '), { encoding: 'utf-8' });
 
-    // Number of posts
-    if (typeof input.number === 'number') {
-        cmdParts.push('-n', input.number.toString());
-    }
+    console.log('CLI output:', output);
 
-    // Output file type
-    if (input.filetype) {
-        cmdParts.push('-t', input.filetype);
-    }
+    // Store the CLI output in Apify dataset
+    await Actor.pushData({ result: output });
 
-    // Output filename
-    if (input.filename) {
-        cmdParts.push('-f', input.filename);
-    }
+    console.log('Scraping finished. Data saved to default dataset.');
 
-    // No download (important!)
-    cmdParts.push('--download', 'false');
-
-    // Use session from session.txt in Apify folder
-    if (input.sessionFile) {
-        cmdParts.push('--session-file', input.sessionFile);
-    } else {
-        // Default path in actor storage
-        cmdParts.push('--session-file', 'apify/session.txt');
-    }
-
-    // Residential proxy support
-    if (input.useApifyProxy) {
-        const proxyGroups = input.apifyProxyGroups?.join(',') || 'RESIDENTIAL';
-        const proxySession = input.apifyProxySession || `session-${Date.now()}`;
-        cmdParts.push('--proxy', `http://proxy.apify.com:8000?session=${proxySession}&groups=${proxyGroups}`);
-    }
-
-    // Convert to a single command string
-    const cmd = cmdParts.join(' ');
-
-    console.log('Running command:', cmd);
-
-    // Execute CLI command
-    const { stdout, stderr } = await execPromise(cmd);
-
-    console.log('CLI stdout:\n', stdout);
-    if (stderr) {
-        console.error('CLI stderr:\n', stderr);
-    }
-
-    // Save output to default key-value store
-    await Actor.setValue('OUTPUT', stdout);
-
-    console.log('Scraping finished successfully.');
 } catch (err) {
-    console.error('Error:', err);
+    console.error('Error during scraping:', err);
     await Actor.setValue('ERROR', err.message);
 } finally {
     await Actor.exit();
