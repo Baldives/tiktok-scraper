@@ -1,54 +1,52 @@
-// apify/main.js
 import { Actor } from 'apify';
-import { execSync } from 'child_process';
+import { execFile } from 'child_process';
 import path from 'path';
-import fs from 'fs';
-import axios from 'axios';
+import util from 'util';
+
+const execFileAsync = util.promisify(execFile);
 
 await Actor.init();
 
-try {
-    const input = await Actor.getInput();
-    const { type, query, number = 0, filetype = 'json', download = false, sessionFile, apifyProxyGroups } = input;
+const input = await Actor.getInput();
 
-    // Validate type
-    if (!['user', 'hashtag', 'trend', 'music', 'video'].includes(type)) {
-        throw new Error(`Invalid type "${type}". Must be one of: user, hashtag, trend, music, video`);
-    }
+const {
+    type,
+    query,
+    number,
+    filetype,
+    download,
+    sessionFile,
+} = input;
 
-    // Download session file if it's a URL
-    let sessionPath = sessionFile;
-    if (sessionFile.startsWith('http')) {
-        const response = await axios.get(sessionFile);
-        sessionPath = 'session.txt';
-        fs.writeFileSync(sessionPath, response.data);
-    }
-
-    // Build CLI command
-    const cliPath = path.join('.', 'cli.js');
-    const cmd = [
-        'node', cliPath,
-        type, query,
-        '--session-file', sessionPath,
-        '--filetype', filetype,
-        '--number', number,
-        download ? '-d' : '',
-        apifyProxyGroups ? `--proxy ${apifyProxyGroups}` : ''
-    ].filter(Boolean);
-
-    console.log('Running TikTok scraper CLI:', cmd.join(' '));
-
-    const output = execSync(cmd.join(' '), { encoding: 'utf-8' });
-
-    console.log('CLI output:', output);
-
-    await Actor.pushData({ result: output });
-
-    console.log('Scraping finished. Data saved to default dataset.');
-
-} catch (err) {
-    console.error('Error during scraping:', err);
-    await Actor.setValue('ERROR', err.message);
-} finally {
-    await Actor.exit();
+// Validate minimal input
+if (!type || !query) {
+    throw new Error('Both "type" and "query" are required');
 }
+
+// Build CLI arguments
+const args = [
+    type,                 // hashtag
+    query,                // funnycats
+    '--number', String(number || 10),
+    '--filetype', filetype || 'json',
+    '--session-file', sessionFile || '',
+];
+
+// Explicitly prevent downloads
+if (download === false) {
+    // do nothing, default is no download
+}
+
+// Run scraper CLI
+const cliPath = path.join(process.cwd(), 'cli.js');
+
+const { stdout, stderr } = await execFileAsync(
+    'node',
+    [cliPath, ...args],
+    { maxBuffer: 1024 * 1024 * 10 }
+);
+
+if (stdout) console.log(stdout);
+if (stderr) console.error(stderr);
+
+await Actor.exit();
