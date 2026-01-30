@@ -1,33 +1,65 @@
-import { Actor } from 'apify';
-import { execSync } from 'child_process';
+import Apify from 'apify';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 
-await Actor.init();
+const execFileAsync = promisify(execFile);
 
-const input = await Actor.getInput();
+Apify.main(async () => {
+    const input = await Apify.getInput();
+    if (!input) throw new Error('No input provided');
 
-const {
-  type,
-  query,
-  number,
-  download,
-  filetype,
-  sessionFile,
-  proxy
-} = input;
+    const {
+        type,
+        query,
+        number,
+        download,
+        filetype,
+        sessionFile,
+        proxy,
+    } = input;
 
-let command = `node cli.js ${type}`;
+    // Build CLI arguments
+    const args = [];
 
-if (query) command += ` ${query}`;
-if (number) command += ` -n ${number}`;
-if (download) command += ` -d`;
-if (filetype) command += ` -t ${filetype}`;
-if (sessionFile) command += ` --session-file ${sessionFile}`;
-if (proxy === 'RESIDENTIAL') {
-  command += ` --proxy ${process.env.APIFY_PROXY_URL}`;
-}
+    // Command + ID
+    if (type === 'trend') {
+        args.push('trend');
+    } else {
+        if (!query) {
+            throw new Error(`"query" is required for type "${type}"`);
+        }
+        args.push(type, query);
+    }
 
-console.log('Running:', command);
+    if (number !== undefined) {
+        args.push('--number', String(number));
+    }
 
-execSync(command, { stdio: 'inherit' });
+    if (download) {
+        args.push('--download');
+    }
 
-await Actor.exit();
+    if (filetype) {
+        args.push('--filetype', filetype);
+    }
+
+    if (sessionFile) {
+        args.push('--session-file', sessionFile);
+    }
+
+    // Apify Residential Proxy
+    if (proxy === 'RESIDENTIAL') {
+        const proxyUrl = await Apify.createProxyConfiguration({
+            groups: ['RESIDENTIAL'],
+        }).then(cfg => cfg.newUrl());
+
+        args.push('--proxy', proxyUrl);
+    }
+
+    Apify.log.info('Running tiktok-scraper with args:', args);
+
+    await execFileAsync('node', ['cli.js', ...args], {
+        cwd: process.cwd(),
+        stdio: 'inherit',
+    });
+});
