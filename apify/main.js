@@ -1,65 +1,37 @@
-import Apify from 'apify';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { ApifyClient } from 'apify-client';
 
-const execFileAsync = promisify(execFile);
+const client = new ApifyClient({
+    token: process.env.APIFY_TOKEN, // 👈 best practice
+});
 
-Apify.main(async () => {
-    const input = await Apify.getInput();
-    if (!input) throw new Error('No input provided');
+const input = {
+    searchType: "hashtag",
+    searchTerms: ["fyp"],
+    maxItems: 100,
 
-    const {
-        type,
-        query,
-        number,
-        download,
-        filetype,
-        sessionFile,
-        proxy,
-    } = input;
+    commentsPerPost: 0,
+    maxRepliesPerComment: 0,
 
-    // Build CLI arguments
-    const args = [];
+    proxy: {
+        useApifyProxy: true,
+        apifyProxyGroups: ["RESIDENTIAL"],
+    },
+};
 
-    // Command + ID
-    if (type === 'trend') {
-        args.push('trend');
-    } else {
-        if (!query) {
-            throw new Error(`"query" is required for type "${type}"`);
-        }
-        args.push(type, query);
-    }
+const run = await client
+    .actor("clockworks/tiktok-scraper")
+    .call(input);
 
-    if (number !== undefined) {
-        args.push('--number', String(number));
-    }
+console.log("✅ Actor finished");
+console.log(
+    `💾 Dataset: https://console.apify.com/storage/datasets/${run.defaultDatasetId}`
+);
 
-    if (download) {
-        args.push('--download');
-    }
+const { items } = await client
+    .dataset(run.defaultDatasetId)
+    .listItems();
 
-    if (filetype) {
-        args.push('--filetype', filetype);
-    }
-
-    if (sessionFile) {
-        args.push('--session-file', sessionFile);
-    }
-
-    // Apify Residential Proxy
-    if (proxy === 'RESIDENTIAL') {
-        const proxyUrl = await Apify.createProxyConfiguration({
-            groups: ['RESIDENTIAL'],
-        }).then(cfg => cfg.newUrl());
-
-        args.push('--proxy', proxyUrl);
-    }
-
-    Apify.log.info('Running tiktok-scraper with args:', args);
-
-    await execFileAsync('node', ['cli.js', ...args], {
-        cwd: process.cwd(),
-        stdio: 'inherit',
-    });
+items.forEach((item, i) => {
+    console.log(`\n📹 Item ${i + 1}`);
+    console.dir(item, { depth: null });
 });
