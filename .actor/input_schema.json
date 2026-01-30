@@ -8,18 +8,21 @@
       "title": "Scrape type",
       "type": "string",
       "description": "Type of TikTok feed to scrape.",
+      "editor": "select",
       "enum": ["hashtag", "user", "trend", "music", "video"],
       "default": "hashtag"
     },
     "query": {
       "title": "Query",
       "type": "string",
-      "description": "Hashtag name, username, music ID, or video URL depending on selected type."
+      "description": "Hashtag name, username, music ID, or video URL depending on selected type.",
+      "editor": "textfield"
     },
     "number": {
       "title": "Number of posts",
       "type": "integer",
       "description": "Number of posts to scrape. Use 0 to scrape all available posts.",
+      "editor": "number",
       "default": 10,
       "minimum": 0
     },
@@ -27,12 +30,14 @@
       "title": "Download videos",
       "type": "boolean",
       "description": "Whether to download video files.",
+      "editor": "checkbox",
       "default": false
     },
     "filetype": {
       "title": "Output file type",
       "type": "string",
       "description": "Output file format for scraped metadata.",
+      "editor": "select",
       "enum": ["json", "csv", "all"],
       "default": "json"
     },
@@ -40,12 +45,14 @@
       "title": "Session file path",
       "type": "string",
       "description": "Path to a file containing TikTok session cookies, one per line.",
+      "editor": "textfield",
       "default": ""
     },
     "proxy": {
       "title": "Proxy type",
       "type": "string",
       "description": "Proxy configuration. Use RESIDENTIAL to enable Apify Residential Proxy.",
+      "editor": "select",
       "enum": ["", "RESIDENTIAL"],
       "default": ""
     }
